@@ -1,9 +1,11 @@
 package hr.apisit.domain;
 
+import java.time.LocalDate;
+
 public interface FixedTerm {
 
-    void setContractStart();
+    void setContractStart(LocalDate startDate);
 
-    void setContractEnd();
+    void setContractEnd(LocalDate endDate);
 
 }

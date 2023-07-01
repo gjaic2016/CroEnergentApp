@@ -19,8 +19,11 @@ public class HouseholdRepository {
 
     private OwnerRepository ownerRepository;
 
+    private ContractRepository contractRepository;
+
     public HouseholdRepository() {
         this.ownerRepository = new OwnerRepository();
+        this.contractRepository = new ContractRepository();
     }
 
     public List<Household> readAllHouseholds() throws IOException {
@@ -38,18 +41,19 @@ public class HouseholdRepository {
             Integer householdOwnerId = Integer.parseInt(lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 2));
                 Owner householdOwner = ownerRepository.readById(householdOwnerId);
 
+
+
             String householdContractIds = lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 3);
                 String[] householdContractsIdArray = householdContractIds.split("\\s+");
 
                 List<Contract> householdContractsList = new ArrayList<>();
 
+                    //TODO izvadit contract id-eve is datoteke
                 for (String contractId : householdContractsIdArray) {
-                    Integer setId = Integer.parseInt(contractId);
-                    //TODO iscupat contract is datoteke
-//                    Contract contract =
-                    //TODO OVDJE JE PROBLEM, treba unjet contract (abstract class)
-                            //TODO koji jos ne postoji, a moze biti fixed ili indefinite
-//                    householdContractsList.add(setId);
+                    Integer setContractId = Integer.parseInt(contractId);
+                    Contract singleContract = contractRepository.readById(setContractId);
+
+                    householdContractsList.add(singleContract);
                 }
 
             Household newHousehold = new Household(householdId, householdAddress, householdOwner, householdContractsList);
@@ -60,7 +64,7 @@ public class HouseholdRepository {
 
     public Household readById(Integer id) throws IOException {
         return readAllHouseholds().stream()
-                .filter(owner -> owner.getId().equals(id))
+                .filter(household -> household.getId().equals(id))
                 .findFirst()
                 .get();
     }

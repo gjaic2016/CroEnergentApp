@@ -2,6 +2,7 @@ package hr.apisit.main;
 
 import hr.apisit.domain.*;
 import hr.apisit.repository.ContractRepository;
+import hr.apisit.repository.HouseholdRepository;
 import hr.apisit.repository.OwnerRepository;
 import hr.apisit.repository.ServiceProviderRepository;
 import hr.apisit.utility.CheckNumberUtility;
@@ -20,23 +21,19 @@ import static hr.apisit.utility.CheckNumberUtility.checkBigDecimalInput;
 
 public class Main {
 
-    //TODO SCANNER CLOSE
-    //TODO SCANNER CLOSE
-    //TODO SCANNER CLOSE
-
     public static void main(String[] args) throws IOException {
 
         Scanner scanner = new Scanner(System.in);
 
 //        menuPrint();
-//
+
         //TODO menu selection
 //        menuSelection(scanner);
 
         /** kreiranje pruzatelja/serviceprovider usluge*/
 //       List<ServiceProvider> serviceProviderList = enterServiceProvider(scanner);
 
-        /** ucitavanje serviceprovider usluge*/
+        /** ucitavanje serviceprovidera iz datoteke*/
         ServiceProviderRepository serviceProviderRepository = new ServiceProviderRepository();
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.readAllServiceProviders();
 
@@ -44,24 +41,24 @@ public class Main {
             System.out.println(s.getNaziv() + ", " + s.getAdresa() + ", " + s.getVrstaUsluge() + ", " + s.getCijenaUsluge());
         }
 
-        /** kreiranje vlasnika/ownera usluge*/
+        /** kreiranje vlasnika/ownera*/
 //        List<Owner> ownerList = enterOwner(scanner);
 
-        /** ucitavanje ownera usluge*/
+        /** ucitavanje ownera iz datoteke*/
         OwnerRepository ownerRepository = new OwnerRepository();
         List<Owner> ownerList = ownerRepository.readAllOwners();
 
-//        for (Owner o : ownerList) {
-//            System.out.println(o.getIme() + ", " + o.getPrezime() + ", " + o.getDatumRodenja() + ", " + o.getOib());
-//        }
+        for (Owner o : ownerList) {
+            System.out.println(o.getIme() + ", " + o.getPrezime() + ", " + o.getDatumRodenja() + ", " + o.getOib());
+        }
 
-        /** kreiranje household, treba imat kreirane ownere za odabir ownera,listu contract = null, */
-        //TODO household - sredit null za ugovor ???
-        //TODO household - sredit reference id objekta za ownera pri ispisu vlasnika???
-        //TODO household - popunit iz datoteke podatke, testirat
-
+        /** kreiranje household, treba imat kreirane ownere za odabir ownera,listu contracta -> kreirati kontrakte on the fly  */
 //        List<Household> householdList = enterHousehold(scanner, ownerList);
-//        System.out.println("Household data test print");
+
+        /** kreiranje household/kucanstva iz datoteke*/
+//        HouseholdRepository householdRepository = new HouseholdRepository();
+//        List<Household> householdList = householdRepository.readAllHouseholds();
+//
 //        for (Household h : householdList) {
 //            System.out.println("h.id: " +  h.getId() + ", "
 //                    + "h.adresa: " +h.getAdresa() + ", "
@@ -75,8 +72,12 @@ public class Main {
         List<Contract> contractsList = contractRepository.readAllContracts();
 
         for (Contract c : contractsList) {
-            System.out.println(c.getId() + ", " + c.getKucanstvo().getVlasnik().getIme() + ", " +
-                    c.getPruzateljUsluge().getNaziv() + ", " + c.getPruzateljUsluge().getCijenaUsluge());
+            System.out.println(c.getId() + ", "
+                    + "Vlasnik: " + c.getKucanstvo().getVlasnik().getIme() + ", "
+                    + c.getKucanstvo().getVlasnik().getPrezime() + ", "
+                    + "Pruzatelj: " + c.getPruzateljUsluge().getNaziv() + ", "
+                    + "Usluga: " + c.getPruzateljUsluge().getVrstaUsluge() + ", "
+                    + "Cijena: " +c.getPruzateljUsluge().getCijenaUsluge());
         }
 
         scanner.close();

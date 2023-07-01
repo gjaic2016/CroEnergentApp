@@ -4,37 +4,47 @@ Smičiklasova 2
 ELECTRICITY_SUPPLY
 333.45
 2
-Avantgard
-Pod lipom 12
+Jugoplastika
+Smičiklasova 2
 WATER_SUPPLY
 233
 3
-Metaloradnja
-Jarun bb
-GARBAGE_COLLECTION
-111.45
-4
-Plinovod OCC
+Jugoplastika
 Smičiklasova 2
 GAS_SUPPLY
-3236.00
-5
+1411.45
+4
 Jugoplastika
 Smičiklasova 2
 INTERNET_SUPPLY
+326.00
+5
+Jugoplastika
+Smičiklasova 2
+GARBAGE_COLLECTION
 133
 6
-Avantgard
-Pod lipom 12
-INTERNET_SUPPLY
-23.50
+MetalGrad
+Jarun bb
+ELECTRICITY_SUPPLY
+233.45
 7
-Metaloradnja
+MetalGrad
 Jarun bb
 WATER_SUPPLY
-11.57
+213
 8
-Plinovod OCC
-Smičiklasova 2
-ELECTRICITY_SUPPLY
-16.33
+MetalGrad
+Jarun bb
+GAS_SUPPLY
+1211.45
+9
+MetalGrad
+Jarun bb
+INTERNET_SUPPLY
+366.00
+10
+MetalGrad
+Jarun bb
+GARBAGE_COLLECTION
+93

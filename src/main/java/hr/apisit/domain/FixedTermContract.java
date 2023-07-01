@@ -22,12 +22,12 @@ public class FixedTermContract extends Contract implements FixedTerm{
 
 
     @Override
-    public void setContractStart() {
-
+    public void setContractStart(LocalDate startDate) {
+        this.contractStart = startDate;
     }
 
     @Override
-    public void setContractEnd() {
-
+    public void setContractEnd(LocalDate endDate) {
+        this.contractStart = endDate;
     }
 }

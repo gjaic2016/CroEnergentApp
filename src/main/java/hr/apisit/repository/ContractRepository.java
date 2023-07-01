@@ -42,10 +42,12 @@ public class ContractRepository {
 
             Integer householdId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES + 3));
                 Household householdOfContract = householdRepository.readById(householdId);
-            System.out.println(householdOfContract.getVlasnik().getIme());
-                Contract newContract;
+
+
+            Contract newContract;
 
             if(contractType.equals("FIXED")) {
+
             String contractStartString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 4);
                 LocalDate contractStart = LocalDateUtility.convertStringToLocalDate(contractStartString);
 
@@ -64,5 +66,13 @@ public class ContractRepository {
         }
         return contractList;
     }
+
+    public Contract readById(Integer id) throws IOException {
+        return readAllContracts().stream()
+                .filter(contract -> contract.getId().equals(id))
+                .findFirst()
+                .get();
+    }
+
 
 }

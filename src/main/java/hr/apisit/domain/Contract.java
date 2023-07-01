@@ -8,6 +8,8 @@ public abstract class Contract {
 
     private Household kucanstvo;
 
+//    private Service_Type serviceType;
+
     public Contract(){}
 
     public Contract(Integer id, ServiceProvider pruzateljUsluge, Household kucanstvo) {
