@@ -3,18 +3,18 @@ package hr.apisit.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Household {
+public class Household implements Comparable<Household> {
 
     private Integer id;
     private String adresa;
     private Owner vlasnik;
-    private List<Contract> ugovor;
+    private List<Contract> ugovor;      //TODO COMPOSITE PATTERN
 
     public Household(Integer id, String adresa, Owner vlasnik, List<Contract> ugovor) {
+//        super(adresa);
         this.id = id;
         this.adresa = adresa;
         this.vlasnik = vlasnik;
-//        this.ugovor = new ArrayList<>();
         this.ugovor = ugovor;
     }
 
@@ -49,4 +49,20 @@ public class Household {
     public void setUgovor(List<Contract> ugovor) {
         this.ugovor = ugovor;
     }
+
+    @Override
+    public String toString() {
+        return "Household{" +
+                "id=" + id +
+                ", adresa='" + adresa + '\'' +
+                ", vlasnik=" + vlasnik +
+                ", ugovor=" + ugovor +
+                '}';
+    }
+
+    @Override
+    public int compareTo(Household o) {
+        return this.getVlasnik().getPrezime().compareTo(o.getVlasnik().getPrezime());
+    }
+
 }

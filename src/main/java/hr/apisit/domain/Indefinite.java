@@ -1,6 +1,8 @@
 package hr.apisit.domain;
 
-public interface Indefinite {
+import java.time.LocalDate;
 
-    void signContract();
+public sealed interface Indefinite permits IndefiniteContract{
+
+    void signContract(LocalDate startDate);
 }

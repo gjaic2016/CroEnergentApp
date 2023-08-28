@@ -2,7 +2,7 @@ package hr.apisit.domain;
 
 import java.time.LocalDate;
 
-public interface FixedTerm {
+public sealed interface FixedTerm permits FixedTermContract{
 
     void setContractStart(LocalDate startDate);
 

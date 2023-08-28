@@ -1,5 +1,8 @@
 package hr.apisit.domain;
 
+import hr.apisit.command.Command;
+import hr.apisit.command.TerminateContractCommand;
+
 import java.time.LocalDate;
 
 
@@ -10,6 +13,8 @@ public class Owner {
     private String prezime;
     private LocalDate datumRodenja;
     private String oib;
+
+    public TerminateContractCommand terminateContractCommand = new TerminateContractCommand();
 
     public Owner(Integer id, String ime, String prezime, LocalDate datumRodenja, String oib) {
         this.id = id;
@@ -56,5 +61,9 @@ public class Owner {
     }
     public void setOib(String oib) {
         this.oib = oib;
+    }
+
+    public void executeCommand(){
+        terminateContractCommand.execute();
     }
 }

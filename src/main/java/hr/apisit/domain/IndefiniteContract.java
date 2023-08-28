@@ -1,17 +1,33 @@
 package hr.apisit.domain;
 
-public class IndefiniteContract extends Contract implements Indefinite{
+import java.time.LocalDate;
 
+public non-sealed class IndefiniteContract extends Contract implements Indefinite{
+
+
+    private LocalDate contractStart;
 
     public IndefiniteContract() {
     }
 
-    public IndefiniteContract(Integer id, ServiceProvider pruzateljUsluge, Household kucanstvo) {
-        super(id, pruzateljUsluge, kucanstvo);
+    public IndefiniteContract(Integer id,String tip, ServiceProvider pruzateljUsluge, Household kucanstvo, LocalDate contractStart) {
+        super(id, tip, pruzateljUsluge, kucanstvo);
+        this.contractStart = contractStart;
     }
 
     @Override
-    public void signContract() {
+    public void signContract(LocalDate startDate) {
+        this.contractStart = startDate;
+    }
 
+    public LocalDate getContractStart() {
+        return contractStart;
+    }
+
+    @Override
+    public String toString() {
+        return "IndefiniteContract{" +
+                "contractStart=" + contractStart +
+                '}';
     }
 }

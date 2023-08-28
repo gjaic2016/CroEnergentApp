@@ -1,8 +1,12 @@
 package hr.apisit.repository;
 
+import hr.apisit.domain.Contract;
+import hr.apisit.domain.Household;
 import hr.apisit.domain.Owner;
 import hr.apisit.utility.LocalDateUtility;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +18,9 @@ public class OwnerRepository {
 
     public static final Integer NUMBER_OF_OWNER_DATA_LINES = 5;
 
-    public List<Owner> readAllOwners() throws IOException {
+    public static final String OWNER_FILE_NAME = "dat/owners.txt";
+
+    public static List<Owner> readAllOwners() throws IOException {
 
         List<Owner> ownerList = new ArrayList<>();
 
@@ -44,6 +50,54 @@ public class OwnerRepository {
                 .filter(owner -> owner.getId().equals(id))
                 .findFirst()
                 .get();
+    }
+
+    public static void writeOwnerToFile(List<Owner> ownerList) throws IOException {
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(OWNER_FILE_NAME));
+        //id
+        //ime
+        //prezime
+        //datumrodenja
+        //oib
+        System.out.println("Writing owner......\n");
+        for (Owner owner : ownerList) {
+            bufferedWriter.write(owner.getId().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getIme().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getPrezime().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(LocalDateUtility.convertlocalDateToString(owner.getDatumRodenja()));
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getOib().toString());
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
+    }
+
+    public static void writeOwnerToFileThread(List<Owner> ownerList) throws IOException {
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("dat/owners.txt"));
+        //id
+        //ime
+        //prezime
+        //datumrodenja
+        //oib
+        System.out.println("Writing owner......\n");
+        for (Owner owner : ownerList) {
+            bufferedWriter.write(owner.getId().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getIme().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getPrezime().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(LocalDateUtility.convertlocalDateToString(owner.getDatumRodenja()));
+            bufferedWriter.newLine();
+            bufferedWriter.write(owner.getOib().toString());
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
     }
 
 }

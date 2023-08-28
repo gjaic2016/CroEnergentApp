@@ -48,3 +48,33 @@ MetalGrad
 Jarun bb
 GARBAGE_COLLECTION
 93
+11
+Titokeramika
+Hondlova 22
+ELECTRICITY_SUPPLY
+935
+12
+Titokeramika
+Hondlova 22
+WATER_SUPPLY
+2333
+13
+Titokeramika
+Hondlova 22
+GAS_SUPPLY
+1211.45
+14
+Titokeramika
+Hondlova 22
+INTERNET_SUPPLY
+126.00
+15
+Titokeramika
+Hondlova 22
+GARBAGE_COLLECTION
+1333.45
+16
+Veleradnja
+Grgina 14
+ELECTRICITY_SUPPLY
+333.45

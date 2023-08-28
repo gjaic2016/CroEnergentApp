@@ -6,6 +6,8 @@ import hr.apisit.domain.Household;
 import hr.apisit.domain.Owner;
 import hr.apisit.utility.LocalDateUtility;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,13 +19,12 @@ public class HouseholdRepository {
 
     public static final Integer NUMBER_OF_HOUSEHOLD_LINES = 4;
 
-    private OwnerRepository ownerRepository;
+    public static final String HOUSEHOLD_FILE_NAME = "dat/testHousehold.txt";
 
-    private ContractRepository contractRepository;
+    private OwnerRepository ownerRepository;
 
     public HouseholdRepository() {
         this.ownerRepository = new OwnerRepository();
-        this.contractRepository = new ContractRepository();
     }
 
     public List<Household> readAllHouseholds() throws IOException {
@@ -35,26 +36,13 @@ public class HouseholdRepository {
 
         for (int i = 0; i < lines.size() / NUMBER_OF_HOUSEHOLD_LINES; i++) {
 
-            Integer householdId = Integer.parseInt(lines.get(i * NUMBER_OF_HOUSEHOLD_LINES));
-            String householdAddress = lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 1);
+            Integer householdId = Integer.parseInt(lines.get(i * NUMBER_OF_HOUSEHOLD_LINES));           //id
+            String householdAddress = lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 1);                     //address
 
-            Integer householdOwnerId = Integer.parseInt(lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 2));
+            Integer householdOwnerId = Integer.parseInt(lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 2));  //ownerid
                 Owner householdOwner = ownerRepository.readById(householdOwnerId);
 
-
-
-            String householdContractIds = lines.get(i * NUMBER_OF_HOUSEHOLD_LINES + 3);
-                String[] householdContractsIdArray = householdContractIds.split("\\s+");
-
-                List<Contract> householdContractsList = new ArrayList<>();
-
-                    //TODO izvadit contract id-eve is datoteke
-                for (String contractId : householdContractsIdArray) {
-                    Integer setContractId = Integer.parseInt(contractId);
-                    Contract singleContract = contractRepository.readById(setContractId);
-
-                    householdContractsList.add(singleContract);
-                }
+            List<Contract> householdContractsList = new ArrayList<>();                                  //contracts
 
             Household newHousehold = new Household(householdId, householdAddress, householdOwner, householdContractsList);
             householdList.add(newHousehold);
@@ -62,11 +50,33 @@ public class HouseholdRepository {
         return householdList;
     }
 
-    public Household readById(Integer id) throws IOException {
-        return readAllHouseholds().stream()
-                .filter(household -> household.getId().equals(id))
-                .findFirst()
-                .get();
-    }
+//    public Household readById(Integer id) throws IOException {
+//        return readAllHouseholds().stream()
+//                .filter(household -> household.getId().equals(id))
+//                .findFirst()
+//                .get();
+//    }
 
+    public void writeHouseholdToFile(List<Household> householdList) throws IOException {
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(HOUSEHOLD_FILE_NAME));
+        //id
+        //adress
+        //owner id
+        //contract list
+        System.out.println("Writing household......\n");
+        for(Household household : householdList){
+            bufferedWriter.write(household.getId().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(household.getAdresa().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(household.getVlasnik().getId().toString());
+            bufferedWriter.newLine();
+            for( Contract contract : household.getUgovor()){
+                bufferedWriter.write(contract.getId().toString() + " ");
+            }
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
+    }
 }

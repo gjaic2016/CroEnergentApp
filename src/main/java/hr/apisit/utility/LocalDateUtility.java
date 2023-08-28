@@ -1,9 +1,9 @@
 package hr.apisit.utility;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class LocalDateUtility {
@@ -14,23 +14,33 @@ public class LocalDateUtility {
 
     public static LocalDate convertStringToLocalDate(String localDateString) {
         return LocalDate.parse(localDateString, formatter);
+
     }
 
     public static LocalDate checkLocalDateEntry(Scanner scanner, String inputMessage, String errorMessage){
 
         boolean wrongInput = true;
-        LocalDate ownerDateOfBirth = null;
+
+        Optional<LocalDate> localdate = Optional.empty();
 
         while (wrongInput) {
             System.out.print(inputMessage);
+            String inputDate = scanner.nextLine();
             try {
-                String inputDate = scanner.nextLine();
-                ownerDateOfBirth = LocalDate.parse(inputDate, formatter);
+                localdate = Optional.of(LocalDate.parse(inputDate, formatter));
                 wrongInput = false;
             } catch (DateTimeParseException ex) {
                 System.out.println(errorMessage);
             }
         }
-        return ownerDateOfBirth;
+        return localdate.get();
+    }
+
+    public static String convertlocalDateToString(LocalDate localDate){
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+        String formattedString = localDate.format(formatter);
+
+        return formattedString;
     }
 }

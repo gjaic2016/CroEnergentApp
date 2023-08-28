@@ -2,15 +2,32 @@ package hr.apisit.domain;
 
 import java.math.BigDecimal;
 
-public class ServiceProvider {
+public class ServiceProvider implements Provider{
 
-    private Integer id;
-    private String naziv;
-    private String adresa;
-    private Service_Type vrstaUsluge;
-    private BigDecimal cijenaUsluge;
+    private final Integer id;
+    private final String naziv;
+    private final String adresa;
+    private final ServiceType vrstaUsluge;
+    private final BigDecimal cijenaUsluge;
 
-    public ServiceProvider(Integer id, String naziv, String adresa, Service_Type vrstaUsluge, BigDecimal cijenaUsluge) {
+
+
+    //TODO SINGLETON PATTERN EXAMPLE
+//    private static ServiceProvider instance;
+//
+//    public static ServiceProvider getInstance() {
+//        if (instance == null) {
+//            instance = new ServiceProvider();
+//        }
+//        return instance;
+//    }
+//    private ServiceProvider() {
+//
+//    }
+
+//    ORIGINAL
+    //TODO SERVICE PROVIDER BUILDER EXAMPLE
+    public ServiceProvider(Integer id, String naziv, String adresa, ServiceType vrstaUsluge, BigDecimal cijenaUsluge) {
         this.id = id;
         this.naziv = naziv;
         this.adresa = adresa;
@@ -22,39 +39,49 @@ public class ServiceProvider {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+//    public void setId(Integer id) {
+//        this.id = id;
+//    }
 
     public String getNaziv() {
         return naziv;
     }
 
-    public void setNaziv(String naziv) {
-        this.naziv = naziv;
-    }
+//    public void setNaziv(String naziv) {
+//        this.naziv = naziv;
+//    }
 
     public String getAdresa() {
         return adresa;
     }
 
-    public void setAdresa(String adresa) {
-        this.adresa = adresa;
-    }
+//    public void setAdresa(String adresa) {
+//        this.adresa = adresa;
+//    }
 
-    public Service_Type getVrstaUsluge() {
+    public ServiceType getVrstaUsluge() {
         return vrstaUsluge;
     }
 
-    public void setVrstaUsluge(Service_Type vrstaUsluge) {
-        this.vrstaUsluge = vrstaUsluge;
-    }
+//    public void setVrstaUsluge(ServiceType vrstaUsluge) {
+//        this.vrstaUsluge = vrstaUsluge;
+//    }
 
     public BigDecimal getCijenaUsluge() {
         return cijenaUsluge;
     }
 
-    public void setCijenaUsluge(BigDecimal cijenaUsluge) {
-        this.cijenaUsluge = cijenaUsluge;
+//    public void setCijenaUsluge(BigDecimal cijenaUsluge) {
+//        this.cijenaUsluge = cijenaUsluge;
+//    }
+
+    @Override
+    public String toString() {
+        return naziv;
+    }
+
+    @Override
+    public void testService() {
+        System.out.println("Testing @RegularServiceProvider....");
     }
 }

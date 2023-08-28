@@ -3,6 +3,8 @@ package hr.apisit.repository;
 import hr.apisit.domain.*;
 import hr.apisit.utility.LocalDateUtility;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,16 +16,12 @@ public class ContractRepository {
 
     public static final Integer NUMBER_OF_CONTRACT_LINES = 6;
 
-    private ServiceProviderRepository serviceProviderRepository;
-
-    private HouseholdRepository householdRepository;
+    public static final String CONTRACTS_FILE_NAME = "dat/testContracts.txt";
 
     public ContractRepository() {
-        this.serviceProviderRepository = new ServiceProviderRepository();
-        this.householdRepository = new HouseholdRepository();
     }
 
-    public List<Contract> readAllContracts() throws IOException {
+    public List<Contract> readAllContracts(List<Household> householdList, List<ServiceProvider> serviceProviderList) throws IOException {
 
         List<Contract> contractList = new ArrayList<>();
 
@@ -33,46 +31,95 @@ public class ContractRepository {
 
         for (int i = 0; i < lines.size() / NUMBER_OF_CONTRACT_LINES; i++) {
 
-            Integer contractId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES));
+            Integer contractId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES));             //line 0 id
 
-            String contractType = lines.get(i * NUMBER_OF_CONTRACT_LINES + 1);
+            String contractType = lines.get(i * NUMBER_OF_CONTRACT_LINES + 1);                          //line 1 type
 
-            Integer serviceProviderId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES + 2));
-                ServiceProvider serviceProviderOfContract = serviceProviderRepository.readById(serviceProviderId);
+            Integer serviceProviderId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES + 2));  //line 2 SProvider
 
-            Integer householdId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES + 3));
-                Household householdOfContract = householdRepository.readById(householdId);
+            ServiceProvider serviceProviderOfContract = null;
+            for (ServiceProvider serviceProvider : serviceProviderList) {
+                if (serviceProvider.getId().equals(serviceProviderId)) {
+                    serviceProviderOfContract = serviceProvider;
+                }
+            }
 
+            Integer householdId = Integer.parseInt(lines.get(i * NUMBER_OF_CONTRACT_LINES + 3));        //line 3 household
+
+            Household householdOfContract = null;
+
+            for (Household house : householdList) {
+                if (house.getId().equals(householdId)) {
+                    householdOfContract = house;
+                }
+            }
 
             Contract newContract;
 
-            if(contractType.equals("FIXED")) {
+            if (contractType.equals("FIXED")) {
 
-            String contractStartString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 4);
+                String contractStartString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 4);
                 LocalDate contractStart = LocalDateUtility.convertStringToLocalDate(contractStartString);
 
-            String contractEndString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 5);
+                String contractEndString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 5);
                 LocalDate contractEnd = LocalDateUtility.convertStringToLocalDate(contractEndString);
 
 
-                newContract = new FixedTermContract(contractId, serviceProviderOfContract, householdOfContract,
+                newContract = new FixedTermContract(contractId, contractType, serviceProviderOfContract, householdOfContract,
                         contractStart, contractEnd);
+            } else {
+                String contractStartString = lines.get(i * NUMBER_OF_CONTRACT_LINES + 4);
+                LocalDate contractStart = LocalDateUtility.convertStringToLocalDate(contractStartString);
+
+                newContract = new IndefiniteContract(contractId, contractType, serviceProviderOfContract, householdOfContract, contractStart);
             }
-            else {
-                newContract = new IndefiniteContract(contractId, serviceProviderOfContract, householdOfContract);
-            }
+
+            householdOfContract.getUgovor().add(newContract);
 
             contractList.add(newContract);
         }
+
         return contractList;
     }
 
-    public Contract readById(Integer id) throws IOException {
-        return readAllContracts().stream()
-                .filter(contract -> contract.getId().equals(id))
-                .findFirst()
-                .get();
-    }
+//    public Contract readById(Integer id) throws IOException {
+//        Contract contract1 = readAllContracts().stream()
+//                .filter(contract -> contract.getId().equals(id))
+//                .findFirst()
+//                .get();
+//        return contract1;
+//    }
 
+    public void writeContractToFile(List<Contract> contractList) throws IOException {
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CONTRACTS_FILE_NAME));
+        //id
+        //type
+        //providerId
+        //householdId
+        //fixed term (startDate, endDate) || indefinite (startDate)
+        System.out.println("Writing contract to file......\n");
+        for (Contract contract : contractList) {
+            bufferedWriter.write(contract.getId().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(contract.getTip().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(contract.getPruzateljUsluge().getId().toString());
+            bufferedWriter.newLine();
+            bufferedWriter.write(contract.getKucanstvo().getId().toString());
+            bufferedWriter.newLine();
+            if (contract instanceof FixedTermContract) {
+                bufferedWriter.write(LocalDateUtility.convertlocalDateToString(((FixedTermContract) contract).getContractStart()));
+                bufferedWriter.newLine();
+                bufferedWriter.write(LocalDateUtility.convertlocalDateToString(((FixedTermContract) contract).getContractEnd()));
+                bufferedWriter.newLine();
+            } else if (contract instanceof IndefiniteContract) {
+                bufferedWriter.write(LocalDateUtility.convertlocalDateToString(((IndefiniteContract) contract).getContractStart()));
+                bufferedWriter.newLine();
+                bufferedWriter.newLine();
+            }
+        }
+        bufferedWriter.close();
+    }
 
 }

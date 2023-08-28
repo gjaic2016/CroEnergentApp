@@ -1,0 +1,85 @@
+1
+Jugoplastika
+Smičiklasova 2
+ELECTRICITY_SUPPLY
+333.45
+2
+Jugoplastika
+Smičiklasova 2
+WATER_SUPPLY
+233
+3
+Jugoplastika
+Smičiklasova 2
+GAS_SUPPLY
+1411.45
+4
+Jugoplastika
+Smičiklasova 2
+INTERNET_SUPPLY
+326.00
+5
+Jugoplastika
+Smičiklasova 2
+GARBAGE_COLLECTION
+133
+6
+MetalGrad
+Jarun bb
+ELECTRICITY_SUPPLY
+233.45
+7
+MetalGrad
+Jarun bb
+WATER_SUPPLY
+213
+8
+MetalGrad
+Jarun bb
+GAS_SUPPLY
+1211.45
+9
+MetalGrad
+Jarun bb
+INTERNET_SUPPLY
+366.00
+10
+MetalGrad
+Jarun bb
+GARBAGE_COLLECTION
+93
+11
+Titokeramika
+Hondlova 22
+ELECTRICITY_SUPPLY
+935
+12
+Titokeramika
+Hondlova 22
+WATER_SUPPLY
+2333
+13
+Titokeramika
+Hondlova 22
+GAS_SUPPLY
+1211.45
+14
+Titokeramika
+Hondlova 22
+INTERNET_SUPPLY
+126.00
+15
+Titokeramika
+Hondlova 22
+GARBAGE_COLLECTION
+1333.45
+16
+Veleradnja
+Grgina 14
+ELECTRICITY_SUPPLY
+333.45
+17
+ALALA
+adresa 2
+INTERNET_SUPPLY
+33.33

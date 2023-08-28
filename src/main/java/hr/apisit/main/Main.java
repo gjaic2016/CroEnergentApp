@@ -1,280 +1,250 @@
 package hr.apisit.main;
 
+import hr.apisit.bridge.Luxury;
+import hr.apisit.bridge.Regular;
+import hr.apisit.bridge.Retro;
+import hr.apisit.decorator.ExternalServiceProviderDecorator;
+import hr.apisit.decorator.InternalServiceProviderDecorator;
+import hr.apisit.decorator.ServiceProviderDecorator;
 import hr.apisit.domain.*;
+import hr.apisit.reports.*;
 import hr.apisit.repository.ContractRepository;
 import hr.apisit.repository.HouseholdRepository;
 import hr.apisit.repository.OwnerRepository;
 import hr.apisit.repository.ServiceProviderRepository;
-import hr.apisit.utility.CheckNumberUtility;
-import hr.apisit.utility.CheckOibUtility;
-import hr.apisit.utility.LocalDateUtility;
-
+import hr.apisit.utility.*;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.sql.SQLOutput;
 import java.time.LocalDate;
-
 import java.util.*;
-
-import static hr.apisit.utility.CheckNumberUtility.checkBigDecimalInput;
+import static hr.apisit.utility.CheckNumberUtility.checkNumericInput;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         Scanner scanner = new Scanner(System.in);
 
-//        menuPrint();
-
-        //TODO menu selection
-//        menuSelection(scanner);
-
-        /** kreiranje pruzatelja/serviceprovider usluge*/
-//       List<ServiceProvider> serviceProviderList = enterServiceProvider(scanner);
-
-        /** ucitavanje serviceprovidera iz datoteke*/
         ServiceProviderRepository serviceProviderRepository = new ServiceProviderRepository();
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.readAllServiceProviders();
 
-        for (ServiceProvider s : serviceProviderList) {
-            System.out.println(s.getNaziv() + ", " + s.getAdresa() + ", " + s.getVrstaUsluge() + ", " + s.getCijenaUsluge());
-        }
-
-        /** kreiranje vlasnika/ownera*/
-//        List<Owner> ownerList = enterOwner(scanner);
-
-        /** ucitavanje ownera iz datoteke*/
         OwnerRepository ownerRepository = new OwnerRepository();
         List<Owner> ownerList = ownerRepository.readAllOwners();
 
-        for (Owner o : ownerList) {
-            System.out.println(o.getIme() + ", " + o.getPrezime() + ", " + o.getDatumRodenja() + ", " + o.getOib());
-        }
+        HouseholdRepository householdRepository = new HouseholdRepository();
+        List<Household> householdList = householdRepository.readAllHouseholds();
 
-        /** kreiranje household, treba imat kreirane ownere za odabir ownera,listu contracta -> kreirati kontrakte on the fly  */
-//        List<Household> householdList = enterHousehold(scanner, ownerList);
-
-        /** kreiranje household/kucanstva iz datoteke*/
-//        HouseholdRepository householdRepository = new HouseholdRepository();
-//        List<Household> householdList = householdRepository.readAllHouseholds();
-//
-//        for (Household h : householdList) {
-//            System.out.println("h.id: " +  h.getId() + ", "
-//                    + "h.adresa: " +h.getAdresa() + ", "
-//                    + "h.vlasnik" + h.getVlasnik().getId() + ", "
-//                    + "h.ugovor: " + h.getUgovor());
-//        }
-
-        /** kreiranje ugovor, treba imat serviceProvider i household*/
-        //TODO contract
         ContractRepository contractRepository = new ContractRepository();
-        List<Contract> contractsList = contractRepository.readAllContracts();
+        List<Contract> contractsList = contractRepository.readAllContracts(householdList, serviceProviderList);
 
-        for (Contract c : contractsList) {
-            System.out.println(c.getId() + ", "
-                    + "Vlasnik: " + c.getKucanstvo().getVlasnik().getIme() + ", "
-                    + c.getKucanstvo().getVlasnik().getPrezime() + ", "
-                    + "Pruzatelj: " + c.getPruzateljUsluge().getNaziv() + ", "
-                    + "Usluga: " + c.getPruzateljUsluge().getVrstaUsluge() + ", "
-                    + "Cijena: " +c.getPruzateljUsluge().getCijenaUsluge());
-        }
+        //TODO OBSERVER
+        ServiceProviderStore store = new ServiceProviderStore();
+        store.getService().subscribe(Event.CONTRACT_EXPIRATION_DATE_ALERT, new EmailListener("pero.peric@mail.com"));
+        store.getService().subscribe(Event.CONTRACT_EXPIRATION_DATE_ALERT, new EmailListener("grga.grgic@mail.com"));
+        store.getService().subscribe(Event.CONTRACT_EXPIRATION_DATE_ALERT, new EmailListener("ivo.ivic@mail.com"));
+        store.getService().subscribe(Event.CONTRACT_PROMOTION_ALERT, new EmailListener("ivo.ivic@mail.com"));
+        store.contractExpirationAlert();
+
+        //TODO DECORATOR
+        Provider testProvider = new ExternalServiceProviderDecorator(
+                new InternalServiceProviderDecorator(
+                new ServiceProvider(17,"BBC", "Ninska 2", ServiceType.ELECTRICITY_SUPPLY, new BigDecimal(12))
+        ));
+        testProvider.testService();
+
+        //TODO COMMAND
+        LocalDate birthdate = LocalDate.of(1966,5,12);
+        Owner newOwner = new Owner(7, "Nosonja", "Smogovac", birthdate, "22222222222");
+        newOwner.executeCommand();
+
+        //TODO BRIDGE
+        Realty newOffice = new Office(6, "Bibc 33", newOwner, contractsList,  new Retro());
+        Realty newOffice2 = new Office(7, "brijunska 43", newOwner, contractsList,  new Regular());
+        Realty newOffice3 = new Office(8, "Listopadska 3", newOwner, contractsList,  new Luxury());
+        System.out.println("Novi office bridge");
+
+        System.out.println(newOffice.getAdresa().toString() + ", "); newOffice.realtyType();
+        System.out.println(newOffice2.getAdresa().toString()+ ", ");newOffice2.realtyType();
+        System.out.println(newOffice3.getAdresa().toString()+ ", ");newOffice3.realtyType();
+
+        menuSelection(scanner, serviceProviderList, ownerList, householdList, contractsList,
+                serviceProviderRepository, ownerRepository, householdRepository, contractRepository);
 
         scanner.close();
-    }
 
-    public static List<ServiceProvider> enterServiceProvider(Scanner scanner) {
-        List<ServiceProvider> serviceProviderList = new ArrayList<>();
-
-        Integer numberOfServiceProviders = CheckNumberUtility.checkIntegerInput(scanner,
-                "Unesite broj pruzatelja usluga: ",
-                "Neispravan unos prpozatelja usluga, pokusajte ponovo!");
-        scanner.nextLine();
-
-        System.out.println("numberOfServiceProviders: " + numberOfServiceProviders + "\n");
-
-        for (int i = 1; i <= numberOfServiceProviders; i++) {
-            System.out.println("------------------------------");
-            Integer providerId = CheckNumberUtility.checkIntegerInput(scanner,
-                    "Unesite id " + i + ". pruzatelja usluga: ",
-                    "Neispravan unos id-a, pokusajte ponovo!");
-            scanner.nextLine();
-
-            System.out.print("Unesite naziv " + i + ". pruzatelja usluga: ");
-            String providerName = scanner.nextLine();
-
-            System.out.print("Unesite adresu " + i + ". pruzatelja usluga: ");
-            String providerAddress = scanner.nextLine();
-
-            System.out.println("Unesite tip usluge " + i + ". pruzatelja usluga. ");
-            Service_Type providerService = serviceSelection(scanner);
-
-            System.out.println("providerService--> " + providerService);
-
-            BigDecimal providerCijena = checkBigDecimalInput(scanner,
-                    "Unesite cijenu usluge " + i + ". pruzatelja usluga: ",
-                    "Neispravan unos broja, pokusajte ponovo!");
-            scanner.nextLine();
-
-            serviceProviderList.add(new ServiceProvider(providerId, providerName, providerAddress, providerService, providerCijena));
-
-        }
-
-        return serviceProviderList;
-
-    }
-
-    private static List<Owner> enterOwner(Scanner scanner) {
-
-        List<Owner> ownerList = new ArrayList<>();
-
-        Integer numberOfOwners = CheckNumberUtility.checkIntegerInput(scanner,
-                "Unesite broj vlasnika: ",
-                "Neispravan unos broja vlasnika, molimo unesite pozitivan broj!");
-        scanner.nextLine();
-
-        for (int i = 1; i <= numberOfOwners; i++) {
-            System.out.println("------------------------------");
-
-            System.out.print("Unesite id " + i + ". vlasnika usluge: ");
-            Integer ownerId = scanner.nextInt();
-            scanner.nextLine();
-
-            System.out.print("Unesite ime " + i + ". vlasnika usluge: ");
-            String ownerFirstName = scanner.nextLine();
-
-            System.out.print("Unesite prezime " + i + ". vlasnika usluge: ");
-            String ownerLastName = scanner.nextLine();
-
-            LocalDate ownerDateOfBirth = LocalDateUtility.checkLocalDateEntry(scanner,
-                    "Unesite datum rođenja " + i + ". vlasnika (u formatu DD.MM.YYYY.): ",
-                    "Unesen krivi format datuma, ponovite unos!");
-
-            String ownerOib = CheckOibUtility.checkOwnerOib(scanner,
-                    "Unesite OIB " + i + ". vlasnika usluge (OIB mora sadržavati 11 znakova): ");
-
-            ownerList.add(new Owner(ownerId, ownerFirstName, ownerLastName, ownerDateOfBirth, ownerOib));
-        }
-
-        return ownerList;
-    }
-
-    private static List<Household> enterHousehold(Scanner scanner,List<Owner> ownerList) {
-
-        List<Household> householdList = new ArrayList<>();
-
-        Integer numberOfHouseholds = CheckNumberUtility.checkIntegerInput(scanner,
-                "Unesite broj kucanstava: ",
-                "Neispravan unos broja kucanstava, molimo unesite ponovno!");
-        scanner.nextLine();
-
-        System.out.println("numberOfHouseholds ---> " + numberOfHouseholds);
-
-        for (int i = 1; i <= numberOfHouseholds; i++) {
-            System.out.println("------------------------------");
-
-            System.out.print("Unesite id " + i + ". kucanstva: ");
-            Integer householdId = scanner.nextInt();
-            scanner.nextLine();
-
-            System.out.print("Unesite adresu " + i + ". kucanstva: ");
-            String householdAddress = scanner.nextLine();
-
-            System.out.print("Unesite vlasnika " + i + ". kucanstva: ");
-            Owner householdOwner = ownerSelection(scanner, ownerList);
-
-//            System.out.print("Unesite ugovore " + i + ". kucanstva: ");
-            List<Contract> householContractList = null;
-
-            householdList.add(new Household(householdId, householdAddress, householdOwner, householContractList));
-        }
-
-
-        return householdList;
-    }
-
-    public static Owner ownerSelection(Scanner scanner, List<Owner> ownerList) {
-
-        Owner ownerSelection = null;
-        int ownerSelectionNumber = 0;
-        do {
-            System.out.println("Odaberite vlasnika kucanstva : ");
-            Integer counter = 1;
-
-            for (Owner o : ownerList) {
-                System.out.println(counter + " - " + o.getIme() + " " + o.getPrezime());
-                counter++;
-            }
-
-            System.out.print("Odaberite redni broj vlasnika: ");
-            ownerSelectionNumber = scanner.nextInt();
-            scanner.nextLine();
-
-        } while (ownerSelectionNumber < 1 || ownerSelectionNumber > ownerList.size());
-
-        ownerSelection = ownerList.get(ownerSelectionNumber - 1);
-
-        return ownerSelection;
-
-    }
-
-    public static Service_Type serviceSelection(Scanner scanner) {
-
-        Service_Type serviceTypeSelection = null;
-        int serviceSelectionNumber = 0;
-        do {
-            System.out.println("Odaberite vrstu usluge koju pruža pružatelj usluge: ");
-            Integer counter = 1;
-
-            for (Service_Type service : Service_Type.values()) {
-                System.out.println(counter + " - " + service.getServiceName());
-                counter++;
-            }
-
-            System.out.print("Odaberite redni broj usluge: ");
-            serviceSelectionNumber = scanner.nextInt();
-            scanner.nextLine();
-
-        } while (serviceSelectionNumber < 1 || serviceSelectionNumber > Service_Type.values().length);
-
-        serviceTypeSelection = Service_Type.values()[serviceSelectionNumber - 1];
-
-        return serviceTypeSelection;
-    }
+    } //END MAIN
 
     static void menuPrint() {
+        System.out.println("\n");
         System.out.println("------------------------------");
         System.out.println("------- AppCroEnergent -------");
         System.out.println("------------------------------");
+        System.out.println("\n");
         System.out.println("Odaberite opciju");
-        System.out.println("1. Unos novih podataka");
-        System.out.println("2. Ažuriranje podataka");
-        System.out.println("3. Pregled podataka");
-        System.out.println("4. Izlaz");
+        System.out.println("1. Unos pružatelja usluga");
+        System.out.println("2. Unos vlasnika");
+        System.out.println("3. Unos kučanstva");
+        System.out.println("4. Unos ugovora");
+        System.out.println("5. AŽuriranje pružatelja usluga");
+        System.out.println("6. AŽuriranje vlasnika");
+        System.out.println("7. AŽuriranje kučanstva");
+        System.out.println("8. AŽuriranje ugovora");
+        System.out.println("9. Pregled podataka, reporti");
+        System.out.println("10. ** Izlaz **");
     }
 
-    static void menuSelection(Scanner scanner) {
-
-        int selection = scanner.nextInt();
-        switch (selection) {
-            case 1:
-//                List<ServiceProvider> serviceProviderList = enterServiceProvider(scanner);
-//                System.out.println("Unos novih podataka");
-                break;
-            case 2:
-                System.out.println("Ažuriranje podataka");
-                break;
-            case 3:
-                System.out.println("Pregled podataka");
-                break;
-            case 4:
-                System.out.println("Izlaz");
-                break;
-            default:
-                System.out.println("Nevažeći odabir");
-        } //end switch
-        scanner.nextLine();
-
+    static void subMenuPrint() {
+        System.out.println("Odaberite opciju...");
+        System.out.println("1. Ispis pružatelja usluga");
+        System.out.println("2. Ispis vlasnika");
+        System.out.println("3. Ispis kučanstva");
+        System.out.println("4. Ispis ugovora");
+        System.out.println("5. Ispis sortiranih pružatelja usluga po adresi");
+        System.out.println("6. DODATNI ZADATAK - Ispis grupiranih pružatelja usluga po tipu usluga");
+        System.out.println("7. Ispis najskupljih usluga");
+        System.out.println("8. Ispis tip ugovora po pružatelju usluga");
+        System.out.println("9. Ispis ukupnih troskova po kucanstvu");
+        System.out.println("10. <-- Nazad");
     }
 
+    static void menuSelection(Scanner scanner, List<ServiceProvider> serviceProviderList, List<Owner> ownerList,
+                              List<Household> householdList, List<Contract> contractsList,
+                              ServiceProviderRepository serviceProviderRepository, OwnerRepository ownerRepository,
+                              HouseholdRepository householdRepository, ContractRepository contractRepository ) throws IOException, CloneNotSupportedException {
+        boolean wrongInput = true;
+        Integer selection;
+        do {
+            menuPrint();
+
+            selection = checkNumericInput(Integer.class, scanner,
+                    "Odabir: ",
+                    "Neispravan unos, molimo pokušajte ponovo!");
+
+            switch (selection) {
+                case 1:
+                    System.out.println("1. Unos pružatelja usluga");
+                    serviceProviderList = CreateServiceProviderUtility.enterServiceProvider(scanner, serviceProviderList);
+                    serviceProviderRepository.writeServiceProviderToFile(serviceProviderList);
+                    break;
+                case 2:
+                    System.out.println("2. Unos vlasnika");
+                    ownerList = CreateOwnerUtility.enterOwner(scanner, ownerList);
+//                    ownerRepository.writeOwnerToFile(ownerList);
+                    break;
+                case 3:
+                    System.out.println("3. Unos kučanstva");
+                    householdList = CreateHouseholdUtility.enterHousehold(scanner, ownerList, householdList);
+//                    householdRepository.writeHouseholdToFile(householdList);
+                    break;
+                case 4:
+                    System.out.println("4. Unos ugovora");
+                    contractsList = CreateContractUtility.enterContract(scanner, serviceProviderList, householdList, contractsList);
+//                    contractRepository.writeContractToFile(contractsList);
+                    break;
+                case 5:
+                    System.out.println("5. AŽuriranje pružatelja usluga");
+                    UpdateServiceProviderUtility.updateServiceProvider(scanner, serviceProviderList);
+                    serviceProviderRepository.writeServiceProviderToFile(serviceProviderList);
+                    break;
+                case 6:
+                    System.out.println("6. AŽuriranje vlasnika - USLUGA TRENUTNO NEDOSTUPNA");
+                    break;
+                case 7:
+                    System.out.println("7. AŽuriranje kučanstva - USLUGA TRENUTNO NEDOSTUPNA");
+                    break;
+                case 8:
+                    System.out.println("8. AŽuriranje ugovora - USLUGA TRENUTNO NEDOSTUPNA");
+                    break;
+                case 9:
+                    System.out.println("\n");
+                    System.out.println("9. Pregled podataka, reporti...\n");
+                    subMenuSelection(scanner, serviceProviderList, ownerList, householdList, contractsList,householdRepository, ownerRepository);
+                    break;
+                case 10:
+                    System.out.println("Izlaz");
+                    wrongInput = false;
+                    break;
+                default:
+                    System.out.println("Nevažeći odabir");
+            } //END SWITCH
+
+        } while (wrongInput); // END DO-WHILE
+    }
+
+    static void subMenuSelection(Scanner scanner, List<ServiceProvider> serviceProviderList, List<Owner> ownerList,
+                                 List<Household> householdList, List<Contract> contractsList,
+                                 HouseholdRepository householdRepository, OwnerRepository ownerRepository) throws IOException, CloneNotSupportedException {
+        boolean wrongInputSubMenu = true;
+        Integer selectionData;
+        do {
+            subMenuPrint();
+            selectionData = CheckNumberUtility.checkIntegerInput(scanner,
+                    "Odabir ispisa podataka: ",
+                    "Neispravan unos, molimo pokušajte ponovo!");
+            scanner.nextLine();
+            System.out.println("-----------------------------");
+            switch (selectionData) {
+                case 1:
+                    System.out.println("ISPIS PRUŽTALJA USLUGA\n");
+                    EntitiesListPrintReport.serviceProviderListPrint(serviceProviderList);
+                    break;
+                case 2:
+                    System.out.println("ISPIS VLASNIKA KUCANSTVA\n");
+                    EntitiesListPrintReport.ownerListPrint(ownerList);
+                    break;
+                case 3:
+                    System.out.println("ISPIS KUCANSTVA\n");
+                    EntitiesListPrintReport.householdListPrint(householdList);
+                    break;
+                case 4:
+                    System.out.println("ISPIS UGOVORA\n");
+                    EntitiesListPrintReport.contractListPrint(contractsList);
+                    break;
+                case 5:
+                    System.out.println("SORTIRANI PRUŽATELJI USLUGA PO ADRESI\n");
+                    SortedServiceProvidersByAdressReport.sortedServiceProvidersByAddress(serviceProviderList);
+                    break;
+                case 6:
+                    System.out.println("GRUPIRANI PRUŽATELJI USLUGA PO TIPU USLUGA\n");
+                    GroupServiceProvidersByServiceTypeReport.groupedServiceProvidersByServiceType(serviceProviderList);
+                    break;
+                case 7:
+                    System.out.println("ISPIS NAJSKUPLJIH USLUGA\n");
+                    MostExpensiveServiceReport.mostExpensiveService(serviceProviderList);
+                    break;
+                case 8:
+                    System.out.println("TIPOVI UGOVORA PO PRUZATELJU USLUGA\n");
+                    ContractTypePerServiceProviderReport.contractTypePerServiceProvider(contractsList);
+                    break;
+                case 9:
+                    System.out.println("UKUPNI TROŠKOVI PO KUCANSTVU\n");
+                    TotalServiceCostPerHouseholdReport.totalServiceCostPerHousehold(householdList);
+                    break;
+                case 10:
+                    //"10. <-- Nazad"
+                    wrongInputSubMenu = false;
+                    break;
+                case 11:
+                    ContractsPerHouseholdReport.contractsPerHousehold(householdList);       //test
+                    break;
+                case 12:
+                    //TODO PROTOTYPE TEST
+                    CityPrototypeReport.cityPrototypeReport();
+                    break;
+                case 13:
+                    //thread practice trigger writing HOUSEHOLD
+                    System.out.println("thread practice trigger writing HOUSEHOLD");
+                    householdRepository.writeHouseholdToFile(householdList);
+                    break;
+                case 14:
+                    //thread practice trigger writing OWNER
+                    System.out.println("thread practice trigger writing OWNER");
+                    ownerRepository.writeOwnerToFile(ownerList);
+                    break;
+                default:
+                    System.out.println("Nevažeći odabir");
+            }
+        } while (wrongInputSubMenu);
+    }
 }
